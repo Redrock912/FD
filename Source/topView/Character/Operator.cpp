@@ -7,6 +7,9 @@
 #include "BulletDamageType.h"
 #include "Components/InputComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Item/ItemBase.h"
+#include "Item/ItemDataTableComponent.h"
+#include "Character/PC_Operator.h"
 
 // Sets default values
 AOperator::AOperator()
@@ -125,5 +128,30 @@ void AOperator::OnDead(FVector Impact)
 	GetMesh()->AddForce(2000000*Impact);
 	
 	SetLifeSpan(3.0f);
+}
+
+void AOperator::ConsumeItem(AItemBase * Item)
+{
+	float Recover =	Item->ItemDataTable->GetItemData(Item->ItemIndex).Power;
+
+	auto PlayerController = Cast<APC_Operator>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
+
+	if (IsLocallyControlled())
+	{
+		if (Item && !Item->IsPendingKill())
+		{
+			if (CurrentHP < MaxHP)
+			{
+				CurrentHP = FMath::Clamp((CurrentHP + Recover), 0.0f, 100.0f);
+				PlayerController->C2S_DestroyItem(Item);
+			}
+		}
+	}
+
+}
+
+void AOperator::EquipItem(AItemBase * Item)
+{
+
 }
 

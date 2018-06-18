@@ -50,4 +50,12 @@ public:
 
 	FVector DeathImpactVector;
 
+
+
+	UFUNCTION()
+	void ConsumeItem(AItemBase* Item);
+
+	UFUNCTION()
+	void EquipItem(AItemBase* Item);
+
 };

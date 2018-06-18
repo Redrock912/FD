@@ -22,9 +22,16 @@ public:
 	UFUNCTION()
 		void OnEndOverlap(UPrimitiveComponent * OverlappedComponent, AActor * OtherActor, UPrimitiveComponent * OtherComp, int32 OtherBodyIndex);
 
-
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	class USphereComponent* Sphere;
 	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	class UItemDataTableComponent* ItemDataTable;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int ItemIndex;
+	
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	
 	

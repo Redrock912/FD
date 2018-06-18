@@ -52,7 +52,7 @@ public:
 		int ItemCount;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
-		TAssetPtr<class UTexture2D> ItemThumnail;
+		TAssetPtr<class UTexture2D> ItemThumbnail;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 		TAssetPtr<class UStaticMesh> ItemMesh;

@@ -1,0 +1,4 @@
+---,ItemIndex,ItemName,ItemEquipSlot,Power,AttackRadius,DamagePerSecond,ItemCount,ItemThumbnail,ItemMesh
+1,1,potion,0,30,0,0,1,,
+2,2,Rocket,1,70,5,0,3,,
+,3,Dart,1,15,1,5,5,,

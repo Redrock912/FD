@@ -12,7 +12,7 @@ UItemDataTableComponent::UItemDataTableComponent()
 
 	// ...
 
-	static ConstructorHelpers::FObjectFinder<UDataTable>Item_DT(TEXT(""));
+	static ConstructorHelpers::FObjectFinder<UDataTable>Item_DT(TEXT("DataTable'/Game/Data/ItemData.ItemData'"));
 
 	if (Item_DT.Succeeded())
 	{
