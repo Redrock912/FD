@@ -3,6 +3,12 @@
 #include "PC_Operator.h"
 
 
+void APC_Operator::BeginPlay()
+{
+	//SetInputMode(FInputModeGameAndUI());
+	bShowMouseCursor = true;
+}
+
 bool APC_Operator::C2S_DestroyItem_Validate(AActor * DestroyItem)
 {
 	return true;

@@ -10,6 +10,7 @@
 #include "Item/ItemBase.h"
 #include "Item/ItemDataTableComponent.h"
 #include "Character/PC_Operator.h"
+#include "Kismet/KismetMathLibrary.h"
 
 // Sets default values
 AOperator::AOperator()
@@ -33,6 +34,34 @@ void AOperator::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	SetDirection();
+
+}
+
+void AOperator::SetDirection()
+{
+	APC_Operator* PlayerController = Cast<APC_Operator>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
+
+	
+
+	FHitResult OutHit;
+	if (PlayerController)
+	{
+		bool Result = PlayerController->GetHitResultUnderCursorByChannel(UEngineTypes::ConvertToTraceType(ECC_EngineTraceChannel1), true, OutHit);
+	
+		if (Result)
+		{
+			// Rotation of character to clicked point 
+			FRotator PlayerRotation = UKismetMathLibrary::FindLookAtRotation(this->GetActorLocation(), OutHit.Location);
+
+
+			FRotator FinalRotator = FRotator( GetActorRotation().Pitch, PlayerRotation.Yaw, GetActorRotation().Roll);
+
+			GetCapsuleComponent()->SetWorldRotation(FinalRotator);
+		}
+
+	}
+	
 }
 
 // Called to bind functionality to input
@@ -49,7 +78,8 @@ void AOperator::MoveRight(float Value)
 {
 	if (Value != 0.0f)
 	{
-		AddMovementInput(GetActorRightVector(), Value);
+		//AddMovementInput(GetActorRightVector(), Value);
+		AddMovementInput(FVector(0, 1, 0), Value);
 	}
 }
 
@@ -57,19 +87,24 @@ void AOperator::MoveForward(float Value)
 {
 	if (Value != 0.0f)
 	{
-		AddMovementInput(GetActorForwardVector(), Value);
+		//AddMovementInput(GetActorForwardVector(), Value);
+		AddMovementInput(FVector(1, 0, 0), Value);
 	}
 }
 
 
 void AOperator::OnShot()
 {
+	UE_LOG(LogClass, Warning, TEXT("FireInput"));
+
 	FVector TraceStart;
 	FVector TraceEnd;
 
 	TraceStart = GetActorLocation();
 	TraceEnd = GetActorLocation() + GetActorForwardVector() * AttackRange;
 	
+	UE_LOG(LogClass, Warning, TEXT("TraceStart: %f %f %f"),GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z);
+	UE_LOG(LogClass, Warning, TEXT("TraceEnd: %f %f %f"), TraceEnd.X, TraceEnd.Y, TraceEnd.Z);
 	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectType;
 	TArray<AActor*> IgnoreObjects;
 	FHitResult OutHit;
@@ -93,7 +128,7 @@ void AOperator::OnShot()
 			TraceEnd - TraceStart, OutHit, UGameplayStatics::GetPlayerController(GetWorld(), 0), this, UBulletDamageType::StaticClass());
 		
 		
-
+		UE_LOG(LogClass, Warning, TEXT("Hit"));
 	}
 
 

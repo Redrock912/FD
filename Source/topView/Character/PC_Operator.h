@@ -15,7 +15,7 @@ class TOPVIEW_API APC_Operator : public APlayerController
 	GENERATED_BODY()
 	
 public:
-	
+	virtual void BeginPlay() override;
 
 	
 	UFUNCTION(Server, Reliable, WithValidation)

@@ -24,6 +24,9 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	UFUNCTION()
+	void SetDirection();
+
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	UFUNCTION()
@@ -46,11 +49,13 @@ public:
 		float CurrentHP;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CharInfo")
-		float AttackRange;
+		float AttackRange = 1000.0f;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	FVector DeathImpactVector;
 
-
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	bool IsShooting;
 
 	UFUNCTION()
 	void ConsumeItem(AItemBase* Item);

@@ -14,7 +14,13 @@ class TOPVIEW_API UMyAniminstance : public UAnimInstance
 {
 	GENERATED_BODY()
 	
+public:
 	
+	virtual void NativeUpdateAnimation(float DeltaSeconds);
 	
-	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="AnimationInfo")
+	float Speed;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "AnimationInfo")
+	float Direction;
 };
