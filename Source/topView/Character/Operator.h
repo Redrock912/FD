@@ -40,6 +40,12 @@ public:
 	void OnShot();
 
 	UFUNCTION(BlueprintCallable)
+	void StartFire();
+
+	UFUNCTION(BlueprintCallable)
+	void StopFire();
+
+	UFUNCTION(BlueprintCallable)
 	void OnDead(FVector Impact);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CharInfo")
@@ -51,11 +57,17 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CharInfo")
 		float AttackRange = 1000.0f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CharInfo")
+	float RecoilTime = 0.5f;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharInfo")
+	FTimerHandle ShootTimerHandle;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	FVector DeathImpactVector;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	bool IsShooting;
+	bool bIsShooting = false;
 
 	UFUNCTION()
 	void ConsumeItem(AItemBase* Item);

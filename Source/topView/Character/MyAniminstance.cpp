@@ -14,5 +14,6 @@ void UMyAniminstance::NativeUpdateAnimation(float DeltaSeconds)
 	{
 		Speed = Char->GetCharacterMovement()->Velocity.Size();
 		Direction = CalculateDirection(Char->GetCharacterMovement()->Velocity, Char->GetActorRotation());
+		bIsShooting = Char->bIsShooting;
 	}
 }

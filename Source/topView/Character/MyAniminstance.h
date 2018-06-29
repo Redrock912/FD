@@ -23,4 +23,7 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "AnimationInfo")
 	float Direction;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "AnimationInfo")
+	bool bIsShooting = false;
 };

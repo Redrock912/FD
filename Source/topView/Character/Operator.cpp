@@ -11,6 +11,7 @@
 #include "Item/ItemDataTableComponent.h"
 #include "Character/PC_Operator.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "TimerManager.h"
 
 // Sets default values
 AOperator::AOperator()
@@ -18,7 +19,7 @@ AOperator::AOperator()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-
+	Tags.Add(TEXT("Player"));
 	
 }
 
@@ -72,7 +73,8 @@ void AOperator::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	PlayerInputComponent->BindAxis(TEXT("MoveForward"), this, &AOperator::MoveForward);
 	PlayerInputComponent->BindAxis(TEXT("MoveRight"), this, &AOperator::MoveRight);
 	
-	PlayerInputComponent->BindAction(TEXT("Fire"),IE_Pressed, this, &AOperator::OnShot);
+	PlayerInputComponent->BindAction(TEXT("Fire"),IE_Pressed, this, &AOperator::StartFire);
+	PlayerInputComponent->BindAction(TEXT("Fire"), IE_Released, this, &AOperator::StopFire);
 }
 void AOperator::MoveRight(float Value)
 {
@@ -96,6 +98,11 @@ void AOperator::MoveForward(float Value)
 void AOperator::OnShot()
 {
 	UE_LOG(LogClass, Warning, TEXT("FireInput"));
+
+	if (bIsShooting == false)
+	{
+		return;
+	}
 
 	FVector TraceStart;
 	FVector TraceEnd;
@@ -131,9 +138,25 @@ void AOperator::OnShot()
 		UE_LOG(LogClass, Warning, TEXT("Hit"));
 	}
 
+	if (bIsShooting)
+	{
+		GetWorldTimerManager().SetTimer(ShootTimerHandle,this,&AOperator::OnShot,RecoilTime);
+	}
 
 	
 	//UGameplayStatics::ApplyDamage(OutHit.GetActor(),50.0f,)
+}
+
+void AOperator::StartFire()
+{
+	bIsShooting = true;
+	OnShot();
+}
+
+
+void AOperator::StopFire() 
+{
+	bIsShooting = false;
 }
 
 float AOperator::TakeDamage(float DamageAmount, FDamageEvent const & DamageEvent, AController * EventInstigator, AActor * DamageCauser)
@@ -163,6 +186,8 @@ void AOperator::OnDead(FVector Impact)
 	GetMesh()->AddForce(2000000*Impact);
 	
 	SetLifeSpan(3.0f);
+
+	
 }
 
 void AOperator::ConsumeItem(AItemBase * Item)
