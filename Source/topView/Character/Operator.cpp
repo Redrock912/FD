@@ -97,7 +97,7 @@ void AOperator::MoveForward(float Value)
 
 void AOperator::OnShot()
 {
-	UE_LOG(LogClass, Warning, TEXT("FireInput"));
+	//UE_LOG(LogClass, Warning, TEXT("FireInput"));
 
 	if (bIsShooting == false)
 	{
@@ -110,8 +110,8 @@ void AOperator::OnShot()
 	TraceStart = GetActorLocation();
 	TraceEnd = GetActorLocation() + GetActorForwardVector() * AttackRange;
 	
-	UE_LOG(LogClass, Warning, TEXT("TraceStart: %f %f %f"),GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z);
-	UE_LOG(LogClass, Warning, TEXT("TraceEnd: %f %f %f"), TraceEnd.X, TraceEnd.Y, TraceEnd.Z);
+	//UE_LOG(LogClass, Warning, TEXT("TraceStart: %f %f %f"),GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z);
+	//UE_LOG(LogClass, Warning, TEXT("TraceEnd: %f %f %f"), TraceEnd.X, TraceEnd.Y, TraceEnd.Z);
 	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectType;
 	TArray<AActor*> IgnoreObjects;
 	FHitResult OutHit;
@@ -165,18 +165,15 @@ float AOperator::TakeDamage(float DamageAmount, FDamageEvent const & DamageEvent
 
 	DeathImpactVector = Player->DeathImpactVector;
 	DeathImpactVector.Normalize();
-	if (DamageEvent.IsOfType(FPointDamageEvent::ClassID))
-	{
-		CurrentHP -= DamageAmount;
-	}
+	CurrentHP -= DamageAmount;
+	
 
 	if (CurrentHP <= 0)
 	{
-	
-
 		OnDead(DeathImpactVector);
 	}
-	UE_LOG(LogClass, Warning, TEXT("%f %f %f"), DeathImpactVector.X, DeathImpactVector.Y, DeathImpactVector.Z);
+
+	//UE_LOG(LogClass, Warning, TEXT("%f %f %f"), DeathImpactVector.X, DeathImpactVector.Y, DeathImpactVector.Z);
 	return 0.0f;
 }
 
