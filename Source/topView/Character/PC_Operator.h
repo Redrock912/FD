@@ -17,6 +17,11 @@ class TOPVIEW_API APC_Operator : public APlayerController
 public:
 	virtual void BeginPlay() override;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	class UBattleWidgetBase* BattleWidget;
+
+	UFUNCTION()
+	void InitializeWidget();
 	
 	UFUNCTION(Server, Reliable, WithValidation)
 	void C2S_DestroyItem(AActor* DestroyItem);

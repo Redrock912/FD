@@ -49,9 +49,14 @@ public:
 	float MaxHP = 100.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float ImpactScale = 5000000.0f;
+	float ImpactScale = 50000.0f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Loot")
+	TSubclassOf<class ADroppedItemBase> Loot;
 
 	float TakeDamage(float DamageAmount, FDamageEvent const & DamageEvent, AController * EventInstigator, AActor * DamageCauser);
+
+	UFUNCTION()
+		void OnDead(AActor* DamageCauser);
 
 };

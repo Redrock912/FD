@@ -30,6 +30,8 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	UFUNCTION()
+	void Interact();
+	UFUNCTION()
 	void MoveRight(float Value);
 	UFUNCTION()
 	void MoveForward(float Value);
@@ -68,6 +70,14 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	bool bIsShooting = false;
+
+	TArray<class AStructureBase*> InteractableList;
+
+	UFUNCTION(BlueprintCallable)
+	void AddInteractableList(class AStructureBase* Sturcture);
+
+	UFUNCTION(BlueprintCallable)
+	void RemoveInteractableList(class AStructureBase* Sturcture);
 
 	UFUNCTION()
 	void ConsumeItem(AItemBase* Item);

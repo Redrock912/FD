@@ -8,6 +8,8 @@
 #include "Enemy/EnemyAIController.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "Item/DroppedItemBase.h"
+
 
 
 
@@ -47,6 +49,19 @@ AEnemyBase::AEnemyBase()
 	CurrentState = EEnemyState::Normal;
 
 
+	static ConstructorHelpers::FObjectFinder<UBlueprint>Loot_Item(TEXT("Blueprint'/Game/Blueprint/Item/BP_DroppedItemGold.BP_DroppedItemGold'"));
+
+	if (Loot_Item.Succeeded())
+	{
+		Loot = (UClass*)Loot_Item.Object->GeneratedClass;
+	}
+
+	//static ConstructorHelpers::FObjectFinder<ADroppedItemBase>Loot_Item2(TEXT("Blueprint'/Game/Blueprint/Item/BP_DroppedItemBase.BP_DroppedItemBase'"));
+	//if (Loot_Item2.Succeeded())
+	//{
+	//	Loot2 = Loot_Item2.Object;
+	//}
+
 }
 
 // Called when the game starts or when spawned
@@ -83,25 +98,49 @@ float AEnemyBase::TakeDamage(float DamageAmount, FDamageEvent const & DamageEven
 	CurrentHP -= DamageAmount;
 	if (CurrentHP <= 0)
 	{
-		CurrentState = EEnemyState::Dead;
-		AEnemyAIController* AIController = Cast<AEnemyAIController>(GetController());
-
-		if (AIController)
-		{
-			AIController->BBComponent->SetValueAsEnum(FName(TEXT("CurrentState")), (uint8)CurrentState);
-		}
-	
-		AOperator* Char = Cast<AOperator>(DamageCauser);
-		
-		FVector ImpactVector = Char->DeathImpactVector.GetSafeNormal();
-
-		ImpactVector *= ImpactScale;
-
-		UE_LOG(LogClass, Warning, TEXT("%f %f %f"), ImpactVector.X, ImpactVector.Y, ImpactVector.Z);
-		GetMesh()->AddForce(ImpactVector);
-		
+		OnDead(DamageCauser);
 	}
 
 	return 0;
+}
+
+void AEnemyBase::OnDead(AActor* DamageCauser)
+{
+	CurrentState = EEnemyState::Dead;
+	AEnemyAIController* AIController = Cast<AEnemyAIController>(GetController());
+
+	if (AIController)
+	{
+		AIController->BBComponent->SetValueAsEnum(FName(TEXT("CurrentState")), (uint8)CurrentState);
+	}
+
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	AOperator* Char = Cast<AOperator>(DamageCauser);
+
+	FVector ImpactVector = Char->DeathImpactVector.GetSafeNormal();
+
+	ImpactVector *= ImpactScale;
+
+	UE_LOG(LogClass, Warning, TEXT("%f %f %f"), ImpactVector.X, ImpactVector.Y, ImpactVector.Z);
+	// 먼저 물리작용을 허용해준다.
+	GetMesh()->SetSimulatePhysics(true);
+	GetMesh()->AddImpulse(ImpactVector);
+	//GetMesh()->AddForce(ImpactVector);
+	
+
+	// Loot Item, Gold
+	FActorSpawnParameters SpawnInfo;
+	SpawnInfo.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+	if (Loot)
+	{
+		UWorld* CurrentWorld = GetWorld();
+		if (CurrentWorld)
+		{
+			
+			CurrentWorld->SpawnActor<ADroppedItemBase>(Loot, GetActorLocation(), GetActorRotation(), SpawnInfo);
+		}
+	}
+	/*UE_LOG(LogClass, Warning, TEXT("%s"), Gold);*/
 }
 

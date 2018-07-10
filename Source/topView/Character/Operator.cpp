@@ -12,6 +12,7 @@
 #include "Character/PC_Operator.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "TimerManager.h"
+#include "Structure/StructureBase.h"
 
 // Sets default values
 AOperator::AOperator()
@@ -75,7 +76,19 @@ void AOperator::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	
 	PlayerInputComponent->BindAction(TEXT("Fire"),IE_Pressed, this, &AOperator::StartFire);
 	PlayerInputComponent->BindAction(TEXT("Fire"), IE_Released, this, &AOperator::StopFire);
+	PlayerInputComponent->BindAction(TEXT("Interact"), IE_Pressed, this, &AOperator::Interact);
 }
+
+void AOperator::Interact()
+{
+	// 각 Structure 마다 따로 일 지정
+	if (InteractableList.Num()!=0)
+	{
+		InteractableList.Top()->DoSomething(this);
+	}
+	
+}
+
 void AOperator::MoveRight(float Value)
 {
 	if (Value != 0.0f)
@@ -185,6 +198,29 @@ void AOperator::OnDead(FVector Impact)
 	SetLifeSpan(3.0f);
 
 	
+}
+
+void AOperator::AddInteractableList(AStructureBase * Structure)
+{
+	if (IsLocallyControlled())
+	{
+		if (Structure && !Structure->IsPendingKill())
+		{
+			InteractableList.Add(Structure);
+		}
+	}
+
+}
+
+void AOperator::RemoveInteractableList(AStructureBase * Structure)
+{
+	if (IsLocallyControlled())
+	{
+		if (Structure && !Structure->IsPendingKill())
+		{
+			InteractableList.Remove(Structure);
+		}
+	}
 }
 
 void AOperator::ConsumeItem(AItemBase * Item)
