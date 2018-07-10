@@ -24,8 +24,13 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	UFUNCTION()
+	void SetDirection();
+
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	UFUNCTION()
+	void Interact();
 	UFUNCTION()
 	void MoveRight(float Value);
 	UFUNCTION()
@@ -37,6 +42,12 @@ public:
 	void OnShot();
 
 	UFUNCTION(BlueprintCallable)
+	void StartFire();
+
+	UFUNCTION(BlueprintCallable)
+	void StopFire();
+
+	UFUNCTION(BlueprintCallable)
 	void OnDead(FVector Impact);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CharInfo")
@@ -46,8 +57,32 @@ public:
 		float CurrentHP;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CharInfo")
-		float AttackRange;
+		float AttackRange = 1000.0f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CharInfo")
+	float RecoilTime = 0.5f;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharInfo")
+	FTimerHandle ShootTimerHandle;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	FVector DeathImpactVector;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	bool bIsShooting = false;
+
+	TArray<class AStructureBase*> InteractableList;
+
+	UFUNCTION(BlueprintCallable)
+	void AddInteractableList(class AStructureBase* Sturcture);
+
+	UFUNCTION(BlueprintCallable)
+	void RemoveInteractableList(class AStructureBase* Sturcture);
+
+	UFUNCTION()
+	void ConsumeItem(AItemBase* Item);
+
+	UFUNCTION()
+	void EquipItem(AItemBase* Item);
 
 };
