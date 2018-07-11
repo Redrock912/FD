@@ -24,4 +24,12 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	float CurrentHP;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	int CurrentTileX;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	int CurrentTileY;
+
+
 };
