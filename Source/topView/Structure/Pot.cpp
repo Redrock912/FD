@@ -48,12 +48,12 @@ void APot::DoSomething(AActor* Player)
 			if (GS)
 			{
 
-				if (GS->HighScore < PS->Score)
+				if (GS->HighScore <= PS->Score)
 				{
 					GS->HighScore = PS->Score;
 					if (HasAuthority())
 					{
-						GS->HighScore = PS->Score;
+						GS->OnRep_ShowHighScore();
 					}
 
 				}

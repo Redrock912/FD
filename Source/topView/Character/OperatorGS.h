@@ -16,6 +16,7 @@ class TOPVIEW_API AOperatorGS : public AGameStateBase
 	
 public:
 
+	AOperatorGS();
 	
 	UPROPERTY(EditAnywhere,BlueprintReadWrite, ReplicatedUsing = OnRep_ShowHighScore)
 	int HighScore = 0;

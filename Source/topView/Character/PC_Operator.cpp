@@ -13,7 +13,7 @@ void APC_Operator::BeginPlay()
 	InitializeWidget();
 }
 
-void APC_Operator::InitializeWidget()
+void APC_Operator::InitializeWidget_Implementation()
 {
 
 	// Constructorhelper 에서는 위젯을 읽을수가없다.
@@ -32,7 +32,11 @@ void APC_Operator::InitializeWidget()
 	if (UClass* MyWidget = BattleWidgetReference.TryLoadClass<UUserWidget>())
 	{
 		BattleWidget = Cast<UBattleWidgetBase>(CreateWidget<UUserWidget>(this, MyWidget));
-		BattleWidget->AddToViewport();
+		if (BattleWidget && IsLocalController())
+		{
+			BattleWidget->AddToViewport();
+		}
+		
 	}
 }
 

@@ -8,8 +8,14 @@
 #include "Engine/World.h"
 #include "UnrealNetwork.h"
 
+AOperatorGS::AOperatorGS()
+{
+	SetReplicates(true);
+}
+
 void AOperatorGS::OnRep_ShowHighScore()
 {
+	
 	auto PC = Cast<APC_Operator>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
 
 	// UI 업데이트 작업

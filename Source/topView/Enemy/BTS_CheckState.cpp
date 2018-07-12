@@ -11,6 +11,7 @@
 void UBTS_CheckState::TickNode(UBehaviorTreeComponent & OwnerComp, uint8 * NodeMemory, float DeltaSeconds)
 {
 	auto Enemy = Cast<AEnemyBase>(OwnerComp.GetAIOwner()->GetPawn());
+	
 
 	if (Enemy)
 	{
@@ -31,6 +32,9 @@ void UBTS_CheckState::TickNode(UBehaviorTreeComponent & OwnerComp, uint8 * NodeM
 		}
 		case EEnemyState::Normal:
 		{
+			
+
+
 			break;
 		}
 		}

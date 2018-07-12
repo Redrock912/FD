@@ -20,8 +20,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	class UBattleWidgetBase* BattleWidget;
 
-	UFUNCTION()
+	UFUNCTION(Client, Reliable)
 	void InitializeWidget();
+	void InitializeWidget_Implementation();
 	
 	UFUNCTION(Server, Reliable, WithValidation)
 	void C2S_DestroyItem(AActor* DestroyItem);

@@ -40,7 +40,7 @@ void AStructureBase::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AA
 	if (OtherActor->ActorHasTag(TEXT("Player")))
 	{
 		auto Char = Cast<AOperator>(OtherActor);
-		if (Char)
+		if (Char->IsLocallyControlled())
 		{
 			Char->AddInteractableList(this);
 		}
@@ -53,7 +53,7 @@ void AStructureBase::OnEndOverlap(UPrimitiveComponent* OverlappedComponent, AAct
 	if (OtherActor->ActorHasTag(TEXT("Player")))
 	{
 		auto Char = Cast<AOperator>(OtherActor);
-		if (Char)
+		if (Char->IsLocallyControlled())
 		{
 			Char->RemoveInteractableList(this);
 		}

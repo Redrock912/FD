@@ -24,14 +24,19 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	class UBoxComponent* Box;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	class UCameraComponent* Camera;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= "Tile")
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= "Tile", Replicated)
 	int TileX;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tile")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tile", Replicated)
 	int TileY;
 	
 
 	UFUNCTION()
 		void OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 };

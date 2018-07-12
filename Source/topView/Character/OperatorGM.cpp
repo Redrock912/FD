@@ -15,7 +15,8 @@ void AOperatorGM::BeginPlay()
 void AOperatorGM::PostLogin(APlayerController * NewPlayer)
 {
 	Super::PostLogin(NewPlayer);
-
+	UE_LOG(LogClass, Warning, TEXT("%d"), count);
+	count += 1;
 	auto PC = Cast<APC_Operator>(NewPlayer);
 	if (PC)
 	{

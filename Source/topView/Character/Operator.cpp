@@ -13,6 +13,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "TimerManager.h"
 #include "Structure/StructureBase.h"
+#include "UnrealNetwork.h"
 
 // Sets default values
 AOperator::AOperator()
@@ -29,6 +30,11 @@ void AOperator::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	// HP setup
+	CurrentHP = MaxHP;
+	
+	auto PC = Cast<APC_Operator>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
+	UE_LOG(LogClass, Warning, TEXT("%s"), PC)
 }
 
 // Called every frame
@@ -42,6 +48,25 @@ void AOperator::Tick(float DeltaTime)
 
 void AOperator::SetDirection()
 {
+	// 계산은 권한이 있는 쪽에서 한다. 클라이언트는 다시 그걸 받아서 적용.
+	if (HasAuthority())
+	{
+		C2S_SetDirection();
+		
+	}
+
+	// 서버에 왜 안가는지
+	GetCapsuleComponent()->SetWorldRotation(LookingRotation);
+}
+
+
+//bool AOperator::C2S_SetDirection_Validate()
+//{
+//	return true;
+//}
+
+void AOperator::C2S_SetDirection_Implementation()
+{
 	APC_Operator* PlayerController = Cast<APC_Operator>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
 
 	
@@ -49,19 +74,26 @@ void AOperator::SetDirection()
 	FHitResult OutHit;
 	if (PlayerController)
 	{
-		bool Result = PlayerController->GetHitResultUnderCursorByChannel(UEngineTypes::ConvertToTraceType(ECC_EngineTraceChannel1), true, OutHit);
-	
-		if (Result)
 		{
-			// Rotation of character to clicked point 
-			FRotator PlayerRotation = UKismetMathLibrary::FindLookAtRotation(this->GetActorLocation(), OutHit.Location);
+			bool Result = PlayerController->GetHitResultUnderCursorByChannel(UEngineTypes::ConvertToTraceType(ECC_EngineTraceChannel1), true, OutHit);
+
+			if (Result && IsLocallyControlled())
+			{
+				//UE_LOG(LogClass, Warning, TEXT("%s"), PlayerController);
+				// Rotation of character to clicked point 
+				FRotator PlayerRotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), OutHit.Location);
 
 
-			FRotator FinalRotator = FRotator( GetActorRotation().Pitch, PlayerRotation.Yaw, GetActorRotation().Roll);
+				
 
-			GetCapsuleComponent()->SetWorldRotation(FinalRotator);
+				LookingRotation = FRotator(GetActorRotation().Pitch, PlayerRotation.Yaw, GetActorRotation().Roll);
+
+				
+				
+			}
+
 		}
-
+		
 	}
 	
 }
@@ -107,10 +139,22 @@ void AOperator::MoveForward(float Value)
 	}
 }
 
+void AOperator::StartFire()
+{
+	bIsShooting = true;
+	OnShot();
+}
+
+
+void AOperator::StopFire()
+{
+	bIsShooting = false;
+}
+
+
 
 void AOperator::OnShot()
 {
-	//UE_LOG(LogClass, Warning, TEXT("FireInput"));
 
 	if (bIsShooting == false)
 	{
@@ -122,6 +166,35 @@ void AOperator::OnShot()
 
 	TraceStart = GetActorLocation();
 	TraceEnd = GetActorLocation() + GetActorForwardVector() * AttackRange;
+
+	C2S_OnShot(TraceStart, TraceEnd);
+
+	if (bIsShooting)
+	{
+		GetWorldTimerManager().SetTimer(ShootTimerHandle, this, &AOperator::OnShot, RecoilTime);
+	}
+}
+
+
+bool AOperator::C2S_OnShot_Validate(FVector TraceStart, FVector TraceEnd)
+{
+	return true;
+}
+
+void AOperator::C2S_OnShot_Implementation(FVector TraceStart, FVector TraceEnd)
+{
+	//UE_LOG(LogClass, Warning, TEXT("FireInput"));
+
+	/*if (bIsShooting == false)
+	{
+		return;
+	}
+
+	FVector TraceStart;
+	FVector TraceEnd;
+
+	TraceStart = GetActorLocation();
+	TraceEnd = GetActorLocation() + GetActorForwardVector() * AttackRange;*/
 	
 	//UE_LOG(LogClass, Warning, TEXT("TraceStart: %f %f %f"),GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z);
 	//UE_LOG(LogClass, Warning, TEXT("TraceEnd: %f %f %f"), TraceEnd.X, TraceEnd.Y, TraceEnd.Z);
@@ -151,29 +224,23 @@ void AOperator::OnShot()
 		UE_LOG(LogClass, Warning, TEXT("Hit"));
 	}
 
-	if (bIsShooting)
-	{
-		GetWorldTimerManager().SetTimer(ShootTimerHandle,this,&AOperator::OnShot,RecoilTime);
-	}
+	//if (bIsShooting)
+	//{
+	//	GetWorldTimerManager().SetTimer(ShootTimerHandle,this,&AOperator::OnShot,RecoilTime);
+	//}
 
 	
 	//UGameplayStatics::ApplyDamage(OutHit.GetActor(),50.0f,)
 }
 
-void AOperator::StartFire()
-{
-	bIsShooting = true;
-	OnShot();
-}
-
-
-void AOperator::StopFire() 
-{
-	bIsShooting = false;
-}
 
 float AOperator::TakeDamage(float DamageAmount, FDamageEvent const & DamageEvent, AController * EventInstigator, AActor * DamageCauser)
 {
+	if (!HasAuthority())
+	{
+		return 0;
+	}
+
 	AOperator* Player = Cast<AOperator>(DamageCauser);
 
 	DeathImpactVector = Player->DeathImpactVector;
@@ -190,14 +257,14 @@ float AOperator::TakeDamage(float DamageAmount, FDamageEvent const & DamageEvent
 	return 0.0f;
 }
 
-void AOperator::OnDead(FVector Impact)
+
+// 죽는 처리
+void AOperator::OnDead_Implementation(FVector Impact)
 {
 	GetMesh()->SetSimulatePhysics(true);
-	GetMesh()->AddForce(2000000*Impact);
-	
-	SetLifeSpan(3.0f);
+	GetMesh()->AddForce(2000000 * Impact);
 
-	
+	SetLifeSpan(3.0f);
 }
 
 void AOperator::AddInteractableList(AStructureBase * Structure)
@@ -246,5 +313,14 @@ void AOperator::ConsumeItem(AItemBase * Item)
 void AOperator::EquipItem(AItemBase * Item)
 {
 
+}
+
+void AOperator::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AOperator, bIsShooting);
+	DOREPLIFETIME(AOperator, CurrentHP);
+	DOREPLIFETIME(AOperator, LookingRotation);
 }
 

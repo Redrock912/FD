@@ -3,8 +3,13 @@
 #include "Floor.h"
 #include "Components/BoxComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Camera/CameraComponent.h"
 #include "Character/Operator.h"
 #include "Character/OperatorPS.h"
+#include "Character/PC_Operator.h"
+#include "Kismet/GameplayStatics.h"
+#include "Engine/World.h"
+#include "UnrealNetwork.h"
 
 
 
@@ -13,6 +18,16 @@ AFloor::AFloor()
 	Box = CreateDefaultSubobject<UBoxComponent>(TEXT("Box"));
 	Box->SetupAttachment(GetStaticMeshComponent());
 
+	// Box Setup
+	Box->SetBoxExtent(FVector(500.0f, 500.0f, 32.0f));
+
+
+	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
+	Camera->SetupAttachment(GetStaticMeshComponent());
+
+	// Camera Setup
+	Camera->SetRelativeLocation(FVector(-400.0f, 0.0f, 800.0f));
+	Camera->SetRelativeRotation(FRotator(-70.0f, 0.0f, 0.0f));
 
 }
 
@@ -28,7 +43,7 @@ void AFloor::OnBeginOverlap(UPrimitiveComponent * OverlappedComponent, AActor * 
 	if (OtherActor->ActorHasTag(TEXT("Player")))
 	{
 		auto Char = Cast<AOperator>(OtherActor);
-		if (Char)
+		if (Char->IsLocallyControlled())
 		{
 			auto PS = Cast<AOperatorPS>(Char->PlayerState);
 			if (PS)
@@ -37,8 +52,24 @@ void AFloor::OnBeginOverlap(UPrimitiveComponent * OverlappedComponent, AActor * 
 				PS->CurrentTileX = TileX;
 				PS->CurrentTileY = TileY;
 			}
+
+			auto PC = Cast<APC_Operator>(Char->GetController());
+			
+			if (PC)
+			{
+				
+				PC->SetViewTargetWithBlend(this);
+			}
+			
 		}
 
 	}
+}
 
+void AFloor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AFloor, TileX);
+	DOREPLIFETIME(AFloor, TileY);
 }

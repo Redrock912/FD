@@ -20,5 +20,7 @@ public:
 
 	virtual void PostLogin(APlayerController* NewPlayer) override;
 	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	int count = 0;
 	
 };
