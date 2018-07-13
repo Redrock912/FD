@@ -14,6 +14,8 @@
 #include "TimerManager.h"
 #include "Structure/StructureBase.h"
 #include "UnrealNetwork.h"
+#include "Public/TimerManager.h"
+
 
 // Sets default values
 AOperator::AOperator()
@@ -21,9 +23,9 @@ AOperator::AOperator()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	Tags.Add(TEXT("Player"));
-	
 }
+
+
 
 // Called when the game starts or when spawned
 void AOperator::BeginPlay()
@@ -35,6 +37,8 @@ void AOperator::BeginPlay()
 	
 	auto PC = Cast<APC_Operator>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
 	UE_LOG(LogClass, Warning, TEXT("%s"), PC)
+
+	/*GetWorldTimerManager().SetTimer(TimerHandle, this, &AOperator::SetDirection,0.05f,true);*/
 }
 
 // Called every frame
@@ -48,28 +52,9 @@ void AOperator::Tick(float DeltaTime)
 
 void AOperator::SetDirection()
 {
-	// 계산은 권한이 있는 쪽에서 한다. 클라이언트는 다시 그걸 받아서 적용.
-	if (HasAuthority())
-	{
-		C2S_SetDirection();
-		
-	}
-
-	// 서버에 왜 안가는지
-	GetCapsuleComponent()->SetWorldRotation(LookingRotation);
-}
-
-
-//bool AOperator::C2S_SetDirection_Validate()
-//{
-//	return true;
-//}
-
-void AOperator::C2S_SetDirection_Implementation()
-{
 	APC_Operator* PlayerController = Cast<APC_Operator>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
 
-	
+
 
 	FHitResult OutHit;
 	if (PlayerController)
@@ -77,25 +62,61 @@ void AOperator::C2S_SetDirection_Implementation()
 		{
 			bool Result = PlayerController->GetHitResultUnderCursorByChannel(UEngineTypes::ConvertToTraceType(ECC_EngineTraceChannel1), true, OutHit);
 
-			if (Result && IsLocallyControlled())
+			if (Result)
 			{
 				//UE_LOG(LogClass, Warning, TEXT("%s"), PlayerController);
 				// Rotation of character to clicked point 
 				FRotator PlayerRotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), OutHit.Location);
 
 
-				
 
+				
 				LookingRotation = FRotator(GetActorRotation().Pitch, PlayerRotation.Yaw, GetActorRotation().Roll);
 
-				
-				
+
+
+				// 계산은 권한이 있는 쪽에서 한다. 클라이언트는 다시 그걸 받아서 적용.
+				if (HasAuthority())
+				{
+
+					S2C_SetDirection(LookingRotation);
+				}
+				else
+				{
+					if (IsLocallyControlled())
+					{
+						// 클라이언트 상에서 돌려주고, 값을 나중에 서버에 보낸다.
+						GetCapsuleComponent()->SetWorldRotation(LookingRotation);
+						C2S_SetDirection(LookingRotation);
+					}
+				}
 			}
 
 		}
-		
+
 	}
+
+
+
 	
+	
+	
+	
+}
+
+bool AOperator::C2S_SetDirection_Validate(FRotator Rotation)
+{
+	return true;
+}
+
+void AOperator::C2S_SetDirection_Implementation(FRotator NewRotation)
+{
+	GetCapsuleComponent()->SetWorldRotation(NewRotation);
+}
+
+void AOperator::S2C_SetDirection_Implementation(FRotator Rotation)
+{
+	GetCapsuleComponent()->SetWorldRotation(Rotation);
 }
 
 // Called to bind functionality to input
@@ -250,6 +271,7 @@ float AOperator::TakeDamage(float DamageAmount, FDamageEvent const & DamageEvent
 
 	if (CurrentHP <= 0)
 	{
+		//GetWorldTimerManager().ClearTimer(TimerHandle);
 		OnDead(DeathImpactVector);
 	}
 
@@ -322,5 +344,6 @@ void AOperator::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetim
 	DOREPLIFETIME(AOperator, bIsShooting);
 	DOREPLIFETIME(AOperator, CurrentHP);
 	DOREPLIFETIME(AOperator, LookingRotation);
+	DOREPLIFETIME(AOperator, DeathImpactVector);
 }
 

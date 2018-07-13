@@ -26,10 +26,15 @@ public:
 
 	UFUNCTION()
 	void SetDirection();
-	UFUNCTION(NetMulticast, Reliable)
-	void C2S_SetDirection();
-	void C2S_SetDirection_Implementation();
-	//bool C2S_SetDirection_Validate();
+	UFUNCTION(Server, WithValidation, Reliable)
+	void C2S_SetDirection(FRotator NewRotation);
+	bool C2S_SetDirection_Validate(FRotator NewRotation);
+	void C2S_SetDirection_Implementation(FRotator NewRotation);
+
+	UFUNCTION(Client, Reliable)
+	void S2C_SetDirection(FRotator Rotation);
+	void S2C_SetDirection_Implementation(FRotator Rotation);
+	
 	
 
 	// Called to bind functionality to input
@@ -80,8 +85,11 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CharInfo")
 	FTimerHandle ShootTimerHandle;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated)
 	FVector DeathImpactVector;
+
+	// 로테이션에 쓰려고했다가 틱으로 계속 사용
+	//FTimerHandle TimerHandle;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated)
 	bool bIsShooting = false;

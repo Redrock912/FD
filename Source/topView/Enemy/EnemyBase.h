@@ -42,7 +42,7 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "AI")
 	class UBehaviorTree* BehaviorTree;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated)
 	float CurrentHP;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -51,12 +51,21 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float ImpactScale = 50000.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Loot")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Loot", Replicated)
 	TSubclassOf<class ADroppedItemBase> Loot;
 
 	float TakeDamage(float DamageAmount, FDamageEvent const & DamageEvent, AController * EventInstigator, AActor * DamageCauser);
+	
 
-	UFUNCTION()
-		void OnDead(AActor* DamageCauser);
+	UFUNCTION(BlueprintCallable,NetMulticast, Reliable)
+	void S2C_OnDead(AActor* DamageCauser);
+	void S2C_OnDead_Implementation(AActor* DamageCauser);
+
+	UFUNCTION(Server, WithValidation, Reliable)
+	void C2S_OnDead(AActor* DamageCauser);
+	bool C2S_OnDead_Validate(AActor* DamageCauser);
+	void C2S_OnDead_Implementation(AActor* DamageCauser);
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 };
