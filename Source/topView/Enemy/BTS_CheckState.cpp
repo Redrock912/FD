@@ -6,37 +6,60 @@
 #include "BehaviorTree/BehaviorTreeComponent.h"
 #include "Enemy/EnemyAIController.h"
 #include "Character/Operator.h"
+#include "Character/OperatorPS.h"
 
 
 void UBTS_CheckState::TickNode(UBehaviorTreeComponent & OwnerComp, uint8 * NodeMemory, float DeltaSeconds)
 {
+
+	//UE_LOG(LogClass, Warning, TEXT("AI Working"));
 	auto Enemy = Cast<AEnemyBase>(OwnerComp.GetAIOwner()->GetPawn());
-	
+	auto Player = Cast<AOperator>(OwnerComp.GetBlackboardComponent()->GetValueAsObject(FName(TEXT("Target"))));
 
 	if (Enemy)
 	{
 		switch (Enemy->CurrentState)
 		{
-		case EEnemyState::Attack:
-		{
-			
-			break;
-		}
+
 		case EEnemyState::Chase:
 		{
-			break;
+			if (Player)
+			{
+				auto PS = Cast<AOperatorPS>(Player->PlayerState);
+				if (PS)
+				{
+					if (!(PS->CurrentTileX == Enemy->TileX && PS->CurrentTileY == Enemy->TileY))
+					{
+						Enemy->CurrentState = EEnemyState::Normal;
+						OwnerComp.GetBlackboardComponent()->SetValueAsEnum(FName(TEXT("CurrentState")), (uint8)Enemy->CurrentState);
+					}
+				}
+				
+			}
+			
 		}
-		case EEnemyState::Dead:
-		{
-			break;
-		}
+		break;
 		case EEnemyState::Normal:
 		{
 			
+			UE_LOG(LogClass, Warning, TEXT("AI Working inside Normal"));
 
+			if (Player)
+			{
 
-			break;
+				auto PS = Cast<AOperatorPS>(Player->PlayerState);
+				if (PS)
+				{
+					if (PS->CurrentTileX == Enemy->TileX && PS->CurrentTileY == Enemy->TileY)
+					{
+						Enemy->CurrentState = EEnemyState::Chase;
+						OwnerComp.GetBlackboardComponent()->SetValueAsEnum(FName(TEXT("CurrentState")), (uint8)Enemy->CurrentState);
+					}
+				}
+
+			}
 		}
+		break;
 		}
 	}
 }

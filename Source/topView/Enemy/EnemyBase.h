@@ -51,17 +51,27 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float ImpactScale = 50000.0f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int TileX;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int TileY;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Loot", Replicated)
 	TSubclassOf<class ADroppedItemBase> Loot;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Loot", Replicated)
+	class ADroppedItemBase* LootItem;
+
 	float TakeDamage(float DamageAmount, FDamageEvent const & DamageEvent, AController * EventInstigator, AActor * DamageCauser);
 	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	void SetTarget();
 
 	UFUNCTION(BlueprintCallable,NetMulticast, Reliable)
 	void S2C_OnDead(AActor* DamageCauser);
 	void S2C_OnDead_Implementation(AActor* DamageCauser);
 
-	UFUNCTION(Server, WithValidation, Reliable)
+	UFUNCTION(BlueprintCallable, Server, WithValidation, Reliable)
 	void C2S_OnDead(AActor* DamageCauser);
 	bool C2S_OnDead_Validate(AActor* DamageCauser);
 	void C2S_OnDead_Implementation(AActor* DamageCauser);

@@ -10,6 +10,7 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Item/DroppedItemBase.h"
 #include "UnrealNetwork.h"
+#include "Kismet/GameplayStatics.h"
 
 
 
@@ -90,6 +91,8 @@ void AEnemyBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 
 }
 
+
+
 float AEnemyBase::TakeDamage(float DamageAmount, FDamageEvent const & DamageEvent, AController * EventInstigator, AActor * DamageCauser)
 {
 	if (CurrentHP <= 0)
@@ -124,6 +127,22 @@ float AEnemyBase::TakeDamage(float DamageAmount, FDamageEvent const & DamageEven
 	return 0;
 }
 
+void AEnemyBase::SetTarget()
+{
+	//
+	auto Player = Cast<AOperator>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
+	auto AIController = Cast<AEnemyAIController>(GetController());
+
+	if (Player && Player->CurrentHP >0)
+	{
+		if (AIController)
+		{
+			AIController->BBComponent->SetValueAsObject(FName(TEXT("Target")), Player);
+			AIController->BBComponent->SetValueAsEnum(FName(TEXT("CurrentState")), (uint8)CurrentState);
+		}
+	}
+}
+
 void AEnemyBase::S2C_OnDead_Implementation(AActor* DamageCauser)
 {
 	CurrentState = EEnemyState::Dead;
@@ -150,18 +169,29 @@ void AEnemyBase::S2C_OnDead_Implementation(AActor* DamageCauser)
 	
 
 	// Loot Item, Gold
-	FActorSpawnParameters SpawnInfo;
-	SpawnInfo.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-	if (Loot)
+	if (HasAuthority()) // 서버에서만 아이템 생성
 	{
-		UWorld* CurrentWorld = GetWorld();
-		if (CurrentWorld)
+		FActorSpawnParameters SpawnInfo;
+		SpawnInfo.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+		if (Loot)
 		{
-			CurrentWorld->SpawnActor<ADroppedItemBase>(Loot, GetActorLocation(), GetActorRotation(), SpawnInfo);
+			UWorld* CurrentWorld = GetWorld();
+			if (CurrentWorld)
+			{
+				if (!LootItem)
+				{
+					LootItem = CurrentWorld->SpawnActor<ADroppedItemBase>(Loot, GetActorLocation(), GetActorRotation(), SpawnInfo);
+					UE_LOG(LogClass, Warning, TEXT("%s"), *LootItem->GetName());
+				}
+
+			}
 		}
 	}
+	
 	/*UE_LOG(LogClass, Warning, TEXT("%s"), Gold);*/
 }
+
+
 
 bool AEnemyBase::C2S_OnDead_Validate(AActor * DamageCauser)
 {
@@ -202,7 +232,7 @@ void AEnemyBase::C2S_OnDead_Implementation(AActor* DamageCauser)
 		if (CurrentWorld)
 		{
 
-			CurrentWorld->SpawnActor<ADroppedItemBase>(Loot, GetActorLocation(), GetActorRotation(), SpawnInfo);
+			LootItem = CurrentWorld->SpawnActor<ADroppedItemBase>(Loot, GetActorLocation(), GetActorRotation(), SpawnInfo);
 		}
 	}
 	/*UE_LOG(LogClass, Warning, TEXT("%s"), Gold);*/
@@ -212,5 +242,6 @@ void AEnemyBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
 {
 	DOREPLIFETIME(AEnemyBase, CurrentHP);
 	DOREPLIFETIME(AEnemyBase, Loot);
+	DOREPLIFETIME(AEnemyBase, LootItem);
 }
 

@@ -64,6 +64,8 @@ void AFloor::OnBeginOverlap(UPrimitiveComponent * OverlappedComponent, AActor * 
 		}
 
 	}
+
+
 }
 
 void AFloor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
