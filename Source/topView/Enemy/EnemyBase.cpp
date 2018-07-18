@@ -5,6 +5,7 @@
 #include "Components/CapsuleComponent.h"
 #include "ConstructorHelpers.h"
 #include "Character/Operator.h"
+#include "Character/OperatorPS.h"
 #include "Enemy/EnemyAIController.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BlackboardComponent.h"
@@ -65,6 +66,8 @@ AEnemyBase::AEnemyBase()
 	//}
 
 	bReplicates = true;
+	
+	Tags.Add(FName(TEXT("Enemy")));
 }
 
 // Called when the game starts or when spawned
@@ -81,6 +84,10 @@ void AEnemyBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (HasAuthority())
+	{
+		S2A_SetPosition(GetActorTransform());
+	}
 }
 
 // Called to bind functionality to input
@@ -127,21 +134,38 @@ float AEnemyBase::TakeDamage(float DamageAmount, FDamageEvent const & DamageEven
 	return 0;
 }
 
-void AEnemyBase::SetTarget()
+void AEnemyBase::SetTarget(AActor* Char)
 {
 	//
-	auto Player = Cast<AOperator>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
-	auto AIController = Cast<AEnemyAIController>(GetController());
-
-	if (Player && Player->CurrentHP >0)
+	if (HasAuthority())
 	{
-		if (AIController)
+
+
+		auto Player = Cast<AOperator>(Char);
+		auto AIController = Cast<AEnemyAIController>(GetController());
+
+		if (Player && Player->CurrentHP > 0 && Player->IsLocallyControlled())
 		{
-			AIController->BBComponent->SetValueAsObject(FName(TEXT("Target")), Player);
-			AIController->BBComponent->SetValueAsEnum(FName(TEXT("CurrentState")), (uint8)CurrentState);
+			// CurrentTile 을 가져오기 위해 PlayerState
+			auto PS = Cast<AOperatorPS>(Player->PlayerState);
+			// Chase 로 상태 변경
+			CurrentState = EEnemyState::Chase;
+
+			if (AIController && PS->CurrentTileX == TileX && PS->CurrentTileY == TileY)
+			{
+				AIController->BBComponent->SetValueAsObject(FName(TEXT("Target")), Player);
+				AIController->BBComponent->SetValueAsEnum(FName(TEXT("CurrentState")), (uint8)CurrentState);
+			}
 		}
+
 	}
 }
+
+void AEnemyBase::S2A_SetPosition_Implementation(FTransform Transform)
+{
+	SetActorTransform(Transform);
+}
+
 
 void AEnemyBase::S2C_OnDead_Implementation(AActor* DamageCauser)
 {
@@ -178,11 +202,13 @@ void AEnemyBase::S2C_OnDead_Implementation(AActor* DamageCauser)
 			UWorld* CurrentWorld = GetWorld();
 			if (CurrentWorld)
 			{
-				if (!LootItem)
-				{
-					LootItem = CurrentWorld->SpawnActor<ADroppedItemBase>(Loot, GetActorLocation(), GetActorRotation(), SpawnInfo);
-					UE_LOG(LogClass, Warning, TEXT("%s"), *LootItem->GetName());
-				}
+				//if (!LootItem)
+				//{
+				//	LootItem = CurrentWorld->SpawnActor<ADroppedItemBase>(Loot, GetActorLocation(), GetActorRotation(), SpawnInfo);
+				//	UE_LOG(LogClass, Warning, TEXT("%s"), *LootItem->GetName());
+				//}
+
+				CurrentWorld->SpawnActor<ADroppedItemBase>(Loot, GetActorLocation(), GetActorRotation(), SpawnInfo);
 
 			}
 		}

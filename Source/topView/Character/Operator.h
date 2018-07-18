@@ -53,9 +53,9 @@ public:
 	void OnShot();
 
 	UFUNCTION(Server, WithValidation, Reliable, BlueprintCallable)
-	void C2S_OnShot(FVector TraceStart, FVector TraceEnd);
-	bool C2S_OnShot_Validate(FVector TraceStart, FVector TraceEnd);
-	void C2S_OnShot_Implementation(FVector TraceStart, FVector TraceEnd);
+	void C2S_OnShot();
+	bool C2S_OnShot_Validate();
+	void C2S_OnShot_Implementation();
 
 	UFUNCTION(BlueprintCallable)
 	void StartFire();

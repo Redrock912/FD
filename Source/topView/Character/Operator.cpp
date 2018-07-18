@@ -23,6 +23,7 @@ AOperator::AOperator()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	Tags.Add(FName(TEXT("Player")));
 }
 
 
@@ -182,13 +183,8 @@ void AOperator::OnShot()
 		return;
 	}
 
-	FVector TraceStart;
-	FVector TraceEnd;
-
-	TraceStart = GetActorLocation();
-	TraceEnd = GetActorLocation() + GetActorForwardVector() * AttackRange;
-
-	C2S_OnShot(TraceStart, TraceEnd);
+	
+	C2S_OnShot();
 
 	if (bIsShooting)
 	{
@@ -197,12 +193,12 @@ void AOperator::OnShot()
 }
 
 
-bool AOperator::C2S_OnShot_Validate(FVector TraceStart, FVector TraceEnd)
+bool AOperator::C2S_OnShot_Validate()
 {
 	return true;
 }
 
-void AOperator::C2S_OnShot_Implementation(FVector TraceStart, FVector TraceEnd)
+void AOperator::C2S_OnShot_Implementation()
 {
 	//UE_LOG(LogClass, Warning, TEXT("FireInput"));
 
@@ -219,6 +215,13 @@ void AOperator::C2S_OnShot_Implementation(FVector TraceStart, FVector TraceEnd)
 	
 	//UE_LOG(LogClass, Warning, TEXT("TraceStart: %f %f %f"),GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z);
 	//UE_LOG(LogClass, Warning, TEXT("TraceEnd: %f %f %f"), TraceEnd.X, TraceEnd.Y, TraceEnd.Z);
+	FVector TraceStart;
+	FVector TraceEnd;
+
+	TraceStart = GetActorLocation();
+	TraceEnd = GetActorLocation() + GetActorForwardVector() * AttackRange;
+
+
 	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectType;
 	TArray<AActor*> IgnoreObjects;
 	FHitResult OutHit;

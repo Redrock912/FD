@@ -7,6 +7,7 @@
 #include "Character/Operator.h"
 #include "Character/OperatorPS.h"
 #include "Character/PC_Operator.h"
+#include "Enemy/EnemyBase.h"	
 #include "Kismet/GameplayStatics.h"
 #include "Engine/World.h"
 #include "UnrealNetwork.h"
@@ -40,6 +41,24 @@ void AFloor::BeginPlay()
 
 void AFloor::OnBeginOverlap(UPrimitiveComponent * OverlappedComponent, AActor * OtherActor, UPrimitiveComponent * OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
 {
+	// 적 리스트 저장
+	if (OtherActor->ActorHasTag(TEXT("Enemy")))
+	{
+
+		auto Enemy = Cast<AEnemyBase>(OtherActor);
+		if (Enemy)
+		{
+			// 적도 위치 지정
+			Enemy->TileX = TileX;
+			Enemy->TileY = TileY;
+
+			EnemyList.Add(Enemy);
+		}
+		
+
+	}
+
+	// 플레이어가 발판을 밟을 시
 	if (OtherActor->ActorHasTag(TEXT("Player")))
 	{
 		auto Char = Cast<AOperator>(OtherActor);
@@ -59,13 +78,18 @@ void AFloor::OnBeginOverlap(UPrimitiveComponent * OverlappedComponent, AActor * 
 			{
 				
 				PC->SetViewTargetWithBlend(this);
+			
 			}
 			
+			UE_LOG(LogClass, Warning, TEXT("QP2"));
+			for (auto Enemies : EnemyList)
+			{
+				UE_LOG(LogClass, Warning, TEXT("QP"));
+				Enemies->SetTarget(Char);
+			}
 		}
 
 	}
-
-
 }
 
 void AFloor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

@@ -64,8 +64,13 @@ public:
 
 	float TakeDamage(float DamageAmount, FDamageEvent const & DamageEvent, AController * EventInstigator, AActor * DamageCauser);
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	void SetTarget();
+	UFUNCTION(BlueprintCallable)
+	void SetTarget(AActor* Char);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void S2A_SetPosition(FTransform Transform);
+	void S2A_SetPosition_Implementation(FTransform Transform);
+
 
 	UFUNCTION(BlueprintCallable,NetMulticast, Reliable)
 	void S2C_OnDead(AActor* DamageCauser);
