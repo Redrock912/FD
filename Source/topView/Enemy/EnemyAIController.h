@@ -24,8 +24,8 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	class UBlackboardComponent* BBComponent;
 
-	UFUNCTION()
-	virtual void Possess(APawn* InPawn) override;
+	//UFUNCTION()
+	//virtual void Possess(APawn* InPawn) override;
 	
 	
 	

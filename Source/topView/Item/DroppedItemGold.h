@@ -17,13 +17,13 @@ class TOPVIEW_API ADroppedItemGold : public ADroppedItemBase
 public:
 
 
-	UFUNCTION()
-		virtual void OnBeginOverlap(UPrimitiveComponent* OverlappedComponent,
-			AActor* OtherActor,
-			UPrimitiveComponent* OtherComp,
-			int32 OtherBodyIndex,
-			bool bFromSweep,
-			const FHitResult &SweepResult) override;
+	//UFUNCTION()
+	//	virtual void OnBeginOverlap(UPrimitiveComponent* OverlappedComponent,
+	//		AActor* OtherActor,
+	//		UPrimitiveComponent* OtherComp,
+	//		int32 OtherBodyIndex,
+	//		bool bFromSweep,
+	//		const FHitResult &SweepResult) override;
 	
 	
 };

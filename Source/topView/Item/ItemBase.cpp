@@ -19,7 +19,7 @@ AItemBase::AItemBase()
 	Sphere->SetupAttachment(GetStaticMeshComponent());
 
 	Sphere->SetSphereRadius(100.0f);
-	Sphere->bGenerateOverlapEvents = true;
+	Sphere->SetGenerateOverlapEvents(true);
 
 	ItemDataTable = CreateDefaultSubobject<UItemDataTableComponent>(TEXT("ItemDataTable"));
 

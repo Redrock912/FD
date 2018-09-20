@@ -21,5 +21,6 @@ void UBattleWidgetBase::NativeTick(const FGeometry & MyGeometry, float InDeltaTi
 	if (Char)
 	{
 		HPBar->SetPercent(Char->CurrentHP / Char->MaxHP);
+
 	}
 }

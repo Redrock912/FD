@@ -13,16 +13,16 @@ AEnemyAIController::AEnemyAIController()
 	BBComponent = CreateDefaultSubobject<UBlackboardComponent>(TEXT("Blackboard"));
 }
 
-void AEnemyAIController::Possess(APawn * InPawn)
-{
-	Super::Possess(InPawn);
-
-	auto Enemy = Cast<AEnemyBase>(InPawn);
-
-	if (Enemy)
-	{
-		BBComponent->InitializeBlackboard(*(Enemy->BehaviorTree->BlackboardAsset));
-
-		BTComponent->StartTree(*Enemy->BehaviorTree);
-	}
-}
+//void AEnemyAIController::Possess(APawn * InPawn)
+//{
+//	Super::Possess(InPawn);
+//
+//	auto Enemy = Cast<AEnemyBase>(InPawn);
+//
+//	if (Enemy)
+//	{
+//		BBComponent->InitializeBlackboard(*(Enemy->BehaviorTree->BlackboardAsset));
+//
+//		BTComponent->StartTree(*Enemy->BehaviorTree);
+//	}
+//}
